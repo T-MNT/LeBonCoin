@@ -1,0 +1,18 @@
+#bulb::before {
+  content: '';
+  height: 1px;
+  width: 70px;
+  background: #fe6e15;
+  position: absolute;
+  top: 50%;
+  left: 0px;
+}
+#bulb::after {
+  content: '';
+  height: 1px;
+  width: 70px;
+  background: #fe6e15;
+  position: absolute;
+  top: 50%;
+  right: 0px;
+}

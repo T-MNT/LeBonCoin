@@ -1,8 +1,8 @@
 import { faArrowLeft, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import routes from '../variables/Vroutes';
 import { setUserSlice } from '../redux/slices/userSlice';
 import { useDispatch } from 'react-redux';
@@ -23,6 +23,13 @@ const Auth = () => {
   });
 
   const dispatch = useDispatch();
+  const param = useParams().param;
+
+  useEffect(() => {
+    if (param && param === 'signin') {
+      setLogin(false);
+    }
+  }, []);
 
   const userSetter = (property, value) => {
     setUser((prevUser) => ({
@@ -99,7 +106,13 @@ const Auth = () => {
           <p className="text-center text-slate-700">
             Envie de nous rejoindre ?{' '}
             <b>
-              <u className="cursor-pointer" onClick={() => setLogin(false)}>
+              <u
+                className="cursor-pointer"
+                onClick={() => {
+                  setLogin(false);
+                  navigate('/authentification/signin');
+                }}
+              >
                 Créer un compte
               </u>
             </b>
@@ -137,7 +150,13 @@ const Auth = () => {
           <p className="text-center text-slate-700">
             Vous avez déjà un compte ?{' '}
             <b>
-              <u className="cursor-pointer" onClick={() => setLogin(true)}>
+              <u
+                className="cursor-pointer"
+                onClick={() => {
+                  setLogin(true);
+                  navigate('/authentification/login');
+                }}
+              >
                 Se connecter
               </u>
             </b>
@@ -182,7 +201,13 @@ const Auth = () => {
           <p className="text-center text-slate-700">
             Vous avez déjà un compte ?{' '}
             <b>
-              <u className="cursor-pointer" onClick={() => setLogin(true)}>
+              <u
+                className="cursor-pointer"
+                onClick={() => {
+                  setLogin(true);
+                  navigate('/authentification/login');
+                }}
+              >
                 Se connecter
               </u>
             </b>
@@ -341,7 +366,13 @@ const Auth = () => {
           <p className="text-center text-slate-700">
             Vous avez déjà un compte ?{' '}
             <b>
-              <u className="cursor-pointer" onClick={() => setLogin(true)}>
+              <u
+                className="cursor-pointer"
+                onClick={() => {
+                  setLogin(true);
+                  navigate('/authentification/login');
+                }}
+              >
                 Se connecter
               </u>
             </b>
