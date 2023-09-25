@@ -7,6 +7,7 @@ import {
 import { faMagnifyingGlass, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
 const Navbar = (props) => {
@@ -22,6 +23,8 @@ const Navbar = (props) => {
     { name: 'Materiel_professionnel', id: 9 },
     { name: 'Autres', id: 10 },
   ];
+
+  const user = useSelector((state) => state.user);
 
   return (
     <div className="border-b-2 border-[#E6EAEE]">
@@ -76,7 +79,9 @@ const Navbar = (props) => {
             <NavLink to="/authentification/login">
               <li className="text-center">
                 <FontAwesomeIcon icon={faUser} size="xl" />
-                <p className="text-xs ">Se connecter</p>
+                <p className="text-xs ">
+                  {user.email !== '' ? 'Mon profil' : 'Se connecter'}
+                </p>
               </li>
             </NavLink>
           </ul>
@@ -88,7 +93,9 @@ const Navbar = (props) => {
                 to={`/search/${element.name.toLocaleLowerCase()}`}
                 onClick={() => props.setCategorie(element.id)}
               >
-                <li className="text-slate-900 text-[14px]">{element.name}</li>
+                <li className="text-slate-900 text-[14px]">
+                  {element.name.replace('_', ' ')}
+                </li>
               </NavLink>
             ))}
           </ul>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../layout/Navbar';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const Search = () => {
@@ -11,6 +11,8 @@ const Search = () => {
   const [priceSet, setPriceSet] = useState(false);
   const [productList, setProductList] = useState([]);
   const [categorie, setCategorie] = useState(1);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -27,6 +29,7 @@ const Search = () => {
               <li
                 className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
                 key={index}
+                onClick={() => navigate('/product/' + product.id)}
               >
                 <div className="h-[200px] w-[320px] rounded bg-slate-700"></div>
                 <div className="pl-4 relative w-7/12">
@@ -69,6 +72,7 @@ const Search = () => {
               <li
                 className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
                 key={index}
+                onClick={() => navigate('/product/' + product.id)}
               >
                 <div className="h-[200px] w-[320px] rounded bg-slate-700"></div>
                 <div className="pl-4 relative w-7/12">

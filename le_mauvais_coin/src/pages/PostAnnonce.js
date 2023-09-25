@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import PostAnnonceBar from '../layout/PostAnnonceBar';
-import Input from '../components/Input';
+import routes from '../variables/Vroutes';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import '../styles/postAnnonce.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const PostAnnonce = () => {
   const user = useSelector((state) => state.user);
@@ -30,6 +31,7 @@ const PostAnnonce = () => {
     localisation: '',
     materielType: '',
     categorie: 0,
+    modele: '',
   });
 
   const annonceSetter = (property, value) => {
@@ -38,6 +40,8 @@ const PostAnnonce = () => {
       [property]: value,
     }));
   };
+
+  const category1 = ['7', '5', '9', '10'];
 
   const contentDisplayer = () => {
     switch (step) {
@@ -85,10 +89,14 @@ const PostAnnonce = () => {
                 onChange={(e) => annonceSetter('nom', e.target.value)}
                 value={annonce.nom}
               />
+              <p className="font-text text-slate-600 mb-2">Catégorie</p>
               <select
                 className="py-3 border-[1px] border-slate-300 rounded-2xl w-[380px] px-3 mr-12"
                 onChange={(e) => {
-                  annonceSetter('categorie', e.target.value);
+                  annonceSetter(
+                    'categorie',
+                    '/api/categories/' + e.target.value
+                  );
                 }}
               >
                 <option value={0}>Choisir une catégorie</option>
@@ -116,19 +124,302 @@ const PostAnnonce = () => {
         return (
           <>
             <h4 className="font-text text-xl mb-3">Dites-nous en plus</h4>
-            <label className="block mb-2">Etat</label>
-            <select
-              className="py-3 border-[1px] border-slate-300 rounded w-[380px] px-3 mr-12 block"
-              onChange={(e) => {
-                annonceSetter('etat', e.target.value);
-              }}
-            >
-              <option value="Etat neuf">Etat neuf</option>
-              <option value="Très bon état">Très bon état</option>
-              <option value="Bon état">Bon état</option>
-              <option value="Etat satisfaisant">Etat satisfaisant</option>
-              <option value="Pour pièces">Pour pièces</option>
-            </select>
+            {category1.includes(annonce.categorie) ? (
+              <div className="mb-6">
+                <label className="block mb-2">Etat</label>
+                <select
+                  className="py-3 border-[1px] border-slate-300 rounded w-[380px] px-3 mr-12 block"
+                  onChange={(e) => {
+                    annonceSetter('etat', e.target.value);
+                  }}
+                >
+                  <option value="Neuf">Neuf</option>
+                  <option value="Très bon état">Très bon état</option>
+                  <option value="Bon état">Bon état</option>
+                  <option value="Etat satisfaisant">Etat satisfaisant</option>
+                  <option value="Pour pièces">Pour pièces</option>
+                </select>
+              </div>
+            ) : null}
+            {/* IMMOBILIER */}
+            {annonce.categorie === '/api/categories/1' ? (
+              <div>
+                <div className="mb-6">
+                  <label className="block mb-2">Type de bien</label>
+                  <select
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    onChange={(e) => {
+                      annonceSetter('materielType', e.target.value);
+                    }}
+                  >
+                    <option>Choisir un type de bien</option>
+                    <option value="Maison">Maison</option>
+                    <option value="Maison">Appartemment</option>
+                  </select>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Localisation</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.localisation}
+                    onChange={(e) => {
+                      annonceSetter('localisation', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">
+                    Année de construction (facultatif)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.annee}
+                    onChange={(e) => {
+                      annonceSetter('annee', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Surface en m²</label>
+                  <input
+                    type="number"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.surface}
+                    onChange={(e) => {
+                      annonceSetter('surface', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Nombre de pièces</label>
+                  <input
+                    type="number"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.pieces}
+                    onChange={(e) => {
+                      annonceSetter('pieces', e.target.value);
+                    }}
+                  ></input>
+                </div>
+              </div>
+            ) : null}
+            {/* VEHICULES */}
+            {annonce.categorie === '/api/categories/2' ? (
+              <div>
+                <div className="mb-6">
+                  <label className="block mb-2">Marque</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.marque}
+                    onChange={(e) => {
+                      annonceSetter('marque', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Modèle</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.modele}
+                    onChange={(e) => {
+                      annonceSetter('modele', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Année</label>
+                  <input
+                    type="number"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.annee}
+                    onChange={(e) => {
+                      annonceSetter('annee', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Kilomètrage</label>
+                  <input
+                    type="number"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.kilometrage}
+                    onChange={(e) => {
+                      annonceSetter('kilometrage', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Carburant</label>
+                  <select
+                    className="py-3 border-[1px] border-slate-300 rounded w-[380px] px-3 mr-12 block"
+                    onChange={(e) => {
+                      annonceSetter('carburant', e.target.value);
+                    }}
+                  >
+                    <option>Choisir un carburant</option>
+                    <option value="Essence">Essence</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Hybride">Hybride</option>
+                    <option value="Electrique">Electrique</option>
+                    <option value="Ethanol">Ethanol</option>
+                  </select>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Boîte de vitesse</label>
+                  <select
+                    className="py-3 border-[1px] border-slate-300 rounded w-[380px] px-3 mr-12 block"
+                    onChange={(e) => {
+                      annonceSetter('boite', e.target.value);
+                    }}
+                  >
+                    <option>Choisir un type de boîte</option>
+                    <option value="Manuelle">Manuelle</option>
+                    <option value="Automatique">Automatique</option>
+                  </select>
+                </div>
+              </div>
+            ) : null}
+            {/* MODE */}
+            {annonce.categorie === '/api/categories/5' ? (
+              <div>
+                <div className="mb-6">
+                  <label className="block mb-2">Marque</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.marque}
+                    onChange={(e) => {
+                      annonceSetter('marque', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Matière</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.matiere}
+                    onChange={(e) => {
+                      annonceSetter('matiere', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Taille</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.taille}
+                    onChange={(e) => {
+                      annonceSetter('taille', e.target.value);
+                    }}
+                  ></input>
+                </div>
+              </div>
+            ) : null}
+            {/* MULTIMEDIA */}
+            {annonce.categorie === '/api/categories/7' ? (
+              <div>
+                <div className="mb-6">
+                  <label className="block mb-2">Type de produit</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.materielType}
+                    onChange={(e) => {
+                      annonceSetter('materielType', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Marque</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.marque}
+                    onChange={(e) => {
+                      annonceSetter('marque', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Modèle</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.matiere}
+                    onChange={(e) => {
+                      annonceSetter('modele', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Année (facultatif)</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.taille}
+                    onChange={(e) => {
+                      annonceSetter('taille', e.target.value);
+                    }}
+                  ></input>
+                </div>
+              </div>
+            ) : null}
+            {/* MATERIEL PROFESSIONNEL */}
+            {annonce.categorie === '/api/categories/9' ? (
+              <div>
+                <div className="mb-6">
+                  <label className="block mb-2">Type de produit</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.materielType}
+                    onChange={(e) => {
+                      annonceSetter('materielType', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Marque</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.marque}
+                    onChange={(e) => {
+                      annonceSetter('marque', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Modèle (facultatif)</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3"
+                    value={annonce.matiere}
+                    onChange={(e) => {
+                      annonceSetter('matiere', e.target.value);
+                    }}
+                  ></input>
+                </div>
+                <div className="mb-6">
+                  <label className="block mb-2">Année (facultatif)</label>
+                  <input
+                    type="text"
+                    className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                    value={annonce.taille}
+                    onChange={(e) => {
+                      annonceSetter('taille', e.target.value);
+                    }}
+                  ></input>
+                </div>
+              </div>
+            ) : null}
             <div className="flex justify-between w-full mt-10">
               <button
                 className="py-2 px-4 border-[1px] border-[#4183D7] text-[#4183D7] rounded  font-text"
@@ -173,11 +464,12 @@ const PostAnnonce = () => {
               <textarea
                 className="w-full h-[200px] border-[1px] border-slate-300 rounded resize-none mt-2 p-2"
                 onChange={(e) => annonceSetter('description', e.target.value)}
+                value={annonce.description}
               />
               <p className="text-sm text-slate-400 text-end mb-2">
                 {annonce.description.length + ' / 4000 caractères'}
               </p>
-              <p className="text-xs text-blue-400">
+              <p className="text-xs text-blue-400 mb-6">
                 Nous vous rappelons que la vente de contrefaçons est interdite.
                 Nous vous invitons à ajouter tout élément permettant de prouver
                 l'authenticité de votre article: numéro de série, facture,
@@ -190,6 +482,17 @@ const PostAnnonce = () => {
                 l'acheteur n'en bénéficiera pas et ne pourra pas demander le
                 remboursement ou l'échange du bien ou service proposé
               </p>
+              <div className="mb-6">
+                <label className="block mb-2">Prix</label>
+                <input
+                  type="number"
+                  className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
+                  value={annonce.prix}
+                  onChange={(e) => {
+                    annonceSetter('prix', e.target.value);
+                  }}
+                ></input>
+              </div>
             </div>
             <div className="flex justify-between w-full mt-10">
               <button
@@ -207,6 +510,159 @@ const PostAnnonce = () => {
             </div>
           </>
         );
+      case 4:
+        return (
+          <>
+            <h4 className="font-text text-xl mb-3">Résumé de votre annonce</h4>
+            <div className="mb-8">
+              <h5 className="font-text text-slate-600">Titre</h5>
+              <p>{annonce.nom}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-y-4 mb-6">
+              <div>
+                <h5 className="font-text text-slate-600">Catégorie</h5>
+                <p>{annonce.categorie}</p>
+              </div>
+              {/* IMMOBILIER */}
+              {annonce.categorie === '/api/categories/1' ? (
+                <>
+                  <div>
+                    <h5 className="font-text text-slate-600">Type de bien</h5>
+                    <p>{annonce.materielType}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Localisation</h5>
+                    <p>{annonce.localisation}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Surface</h5>
+                    <p>{annonce.surface + ' m²'}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">
+                      Nombre de pièces
+                    </h5>
+                    <p>{annonce.pieces}</p>
+                  </div>
+                </>
+              ) : null}
+              {/* VEHICULES */}
+              {annonce.categorie === '/api/categories/2' ? (
+                <>
+                  <div>
+                    <h5 className="font-text text-slate-600">Marque</h5>
+                    <p>{annonce.marque}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Modèle</h5>
+                    <p>{annonce.modele}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Année</h5>
+                    <p>{annonce.annee}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Kilométrage</h5>
+                    <p>{annonce.kilometrage}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Carburant</h5>
+                    <p>{annonce.carburant}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">
+                      Boîte de vitesse
+                    </h5>
+                    <p>{annonce.boite}</p>
+                  </div>
+                </>
+              ) : null}
+              {/* MODE */}
+              {annonce.categorie === '/api/categories/5' ? (
+                <>
+                  <div>
+                    <h5 className="font-text text-slate-600">Marque</h5>
+                    <p>{annonce.marque}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Matière</h5>
+                    <p>{annonce.matiere}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Taille</h5>
+                    <p>{annonce.taille}</p>
+                  </div>
+                </>
+              ) : null}
+              {/* MULTIMEDIA */}
+              {annonce.categorie === '/api/categories/7' ? (
+                <>
+                  <div>
+                    <h5 className="font-text text-slate-600">
+                      Type de produit
+                    </h5>
+                    <p>{annonce.materielType}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Marque</h5>
+                    <p>{annonce.marque}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Modèle</h5>
+                    <p>{annonce.modele}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Etat</h5>
+                    <p>{annonce.etat}</p>
+                  </div>
+                </>
+              ) : null}
+              {/* MATERIEL PROFESSIONNEL */}
+              {annonce.categorie === '/api/categories/9' ? (
+                <>
+                  <div>
+                    <h5 className="font-text text-slate-600">
+                      Type de matériel
+                    </h5>
+                    <p>{annonce.materielType}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Marque</h5>
+                    <p>{annonce.marque}</p>
+                  </div>
+                  <div>
+                    <h5 className="font-text text-slate-600">Etat</h5>
+                    <p>{annonce.etat}</p>
+                  </div>
+                </>
+              ) : null}
+              <div>
+                <h5 className="font-text text-slate-600">Prix</h5>
+                <p>{annonce.prix + ' €'}</p>
+              </div>
+            </div>
+
+            <h5 className="font-text text-slate-600">Description</h5>
+            <p>{annonce.description}</p>
+            <div className="flex justify-between w-full mt-10">
+              <button
+                className="py-2 px-4 border-[1px] border-[#4183D7] text-[#4183D7] rounded  font-text"
+                onClick={() => setStep(step - 1)}
+              >
+                Retour
+              </button>
+              <button
+                className="py-2 px-4 bg-[#4183D7] rounded text-white font-text"
+                onClick={() => {
+                  axios.post(routes.BACK + '/products', annonce);
+                }}
+              >
+                Poster mon annonce
+              </button>
+            </div>
+          </>
+        );
       default:
         break;
     }
@@ -218,7 +674,7 @@ const PostAnnonce = () => {
       <div className="w-[55%] mx-auto mt-6">
         <div className="flex">
           <div className="bg-white w-3/4 p-6 rounded">
-            {user.email != '' ? (
+            {user.email !== '' ? (
               contentDisplayer()
             ) : (
               <>

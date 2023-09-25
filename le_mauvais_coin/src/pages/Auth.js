@@ -62,6 +62,10 @@ const Auth = () => {
                 .then((res) => {
                   if (res.status === 200 || res.status === 201) {
                     dispatch(setUserSlice(jwtDecode(res.data.token)));
+                    window.localStorage.setItem(
+                      'leboncoin login token : ',
+                      res.data.token
+                    );
                     toast.success('Connexion réussie', {
                       position: 'bottom-right',
                       autoClose: 3000,

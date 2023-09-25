@@ -67,6 +67,13 @@ class Product
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $materielType = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $modele = null;
+
+    #[ORM\ManyToOne(inversedBy: 'products')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $vendeur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -272,6 +279,30 @@ class Product
     public function setMaterielType(?string $materielType): static
     {
         $this->materielType = $materielType;
+
+        return $this;
+    }
+
+    public function getModele(): ?string
+    {
+        return $this->modele;
+    }
+
+    public function setModele(?string $modele): static
+    {
+        $this->modele = $modele;
+
+        return $this;
+    }
+
+    public function getVendeur(): ?User
+    {
+        return $this->vendeur;
+    }
+
+    public function setVendeur(?User $vendeur): static
+    {
+        $this->vendeur = $vendeur;
 
         return $this;
     }
