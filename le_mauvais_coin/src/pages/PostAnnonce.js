@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PostAnnonceBar from '../layout/PostAnnonceBar';
 import routes from '../variables/Vroutes';
 import { useSelector } from 'react-redux';
@@ -10,29 +10,37 @@ import axios from 'axios';
 
 const PostAnnonce = () => {
   const user = useSelector((state) => state.user);
+  const userAccount = useSelector((state) => state.userAccount);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
   const [annonce, setAnnonce] = useState({
-    nom: '',
-    prix: 0,
-    annee: '',
-    etat: '',
-    description: '',
-    kilometrage: '',
-    boite: '',
-    carburant: '',
-    matiere: '',
-    taille: '',
-    couleur: '',
-    marque: '',
-    surface: 0,
-    pieces: 0,
-    localisation: '',
-    materielType: '',
-    categorie: 0,
-    modele: '',
+    nom: null,
+    prix: null,
+    annee: null,
+    etat: null,
+    description: null,
+    kilometrage: null,
+    boite: null,
+    carburant: null,
+    matiere: null,
+    taille: null,
+    couleur: null,
+    marque: null,
+    surface: null,
+    pieces: null,
+    localisation: null,
+    materielType: null,
+    categorie: null,
+    modele: null,
+    vendeur: null,
   });
+
+  useEffect(() => {
+    if (user.email !== '') {
+      annonceSetter('vendeur', '/api/users/' + userAccount.id);
+    }
+  }, [userAccount]);
 
   const annonceSetter = (property, value) => {
     setAnnonce((prevAnnonce) => ({

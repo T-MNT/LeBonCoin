@@ -5,73 +5,95 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[ApiResource]
+#[ApiResource(normalizationContext: ['groups' => ['product']])]
 class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('product')]
     private ?int $id = null;
 
+
     #[ORM\Column(length: 255)]
+    #[Groups('product')]
     private ?string $nom = null;
 
     #[ORM\Column]
+    #[Groups('product')]
     private ?int $prix = null;
 
     #[ORM\Column(length: 4, nullable: true)]
+    #[Groups('product')]
     private ?string $annee = null;
 
     #[ORM\Column(length: 48, nullable: true)]
+    #[Groups('product')]
     private ?string $etat = null;
 
     #[ORM\Column(length: 1200)]
+    #[Groups('product')]
     private ?string $description = null;
 
     #[ORM\Column(length: 12, nullable: true)]
+    #[Groups('product')]
     private ?string $kilometrage = null;
 
     #[ORM\Column(length: 48, nullable: true)]
+    #[Groups('product')]
     private ?string $boite = null;
 
     #[ORM\Column(length: 48, nullable: true)]
+    #[Groups('product')]
     private ?string $carburant = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups('product')]
     private ?Category $categorie = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('product')]
     private ?string $matiere = null;
 
     #[ORM\Column(length: 24, nullable: true)]
+    #[Groups('product')]
     private ?string $taille = null;
 
     #[ORM\Column(length: 48, nullable: true)]
+    #[Groups('product')]
     private ?string $couleur = null;
 
     #[ORM\Column(length: 48, nullable: true)]
+    #[Groups('product')]
     private ?string $marque = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups('product')]
     private ?int $surface = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups('product')]
     private ?int $pieces = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('product')]
     private ?string $localisation = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('product')]
     private ?string $materielType = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('product')]
     private ?string $modele = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups('product')]
     private ?User $vendeur = null;
 
     public function getId(): ?int

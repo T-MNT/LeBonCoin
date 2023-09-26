@@ -8,15 +8,24 @@ import { useDispatch } from 'react-redux';
 import { setUserSlice } from './redux/slices/userSlice';
 import jwtDecode from 'jwt-decode';
 import ProductPage from './pages/ProductPage';
+import { setUserAccount } from './redux/slices/userAccountSlice';
+import axios from 'axios';
 
 function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const token = window.localStorage.getItem('leboncoin login token : ');
-    console.log(token);
+    console.log(jwtDecode(token));
     if (token) {
       dispatch(setUserSlice(jwtDecode(token)));
+      axios
+        .get(
+          'https://127.0.0.1:8000/getUserByMail/' + jwtDecode(token).username
+        )
+        .then((res) => {
+          dispatch(setUserAccount(res.data[0]));
+        });
     }
   }, []);
 

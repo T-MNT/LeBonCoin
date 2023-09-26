@@ -8,6 +8,7 @@ import { setUserSlice } from '../redux/slices/userSlice';
 import { useDispatch } from 'react-redux';
 import jwtDecode from 'jwt-decode';
 import { toast } from 'react-toastify';
+import { setUserAccount } from '../redux/slices/userAccountSlice';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -38,6 +39,29 @@ const Auth = () => {
     }));
   };
 
+  const loginHandler = () => {
+    axios
+      .post(routes.BACK + '/login', {
+        username: user.email,
+        password: user.password,
+      })
+      .then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          dispatch(setUserSlice(jwtDecode(res.data.token)));
+          window.localStorage.setItem(
+            'leboncoin login token : ',
+            res.data.token
+          );
+          axios
+            .get('https://127.0.0.1:8000/getUserByMail/' + user.email)
+            .then((res) => {
+              dispatch(setUserAccount(res.data[0]));
+              navigate('/');
+            });
+        }
+      });
+  };
+
   const authBoxDisplayer = () => {
     if (login) {
       return (
@@ -54,31 +78,7 @@ const Auth = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              axios
-                .post(routes.BACK + '/login', {
-                  username: user.email,
-                  password: user.password,
-                })
-                .then((res) => {
-                  if (res.status === 200 || res.status === 201) {
-                    dispatch(setUserSlice(jwtDecode(res.data.token)));
-                    window.localStorage.setItem(
-                      'leboncoin login token : ',
-                      res.data.token
-                    );
-                    toast.success('Connexion réussie', {
-                      position: 'bottom-right',
-                      autoClose: 3000,
-                      hideProgressBar: false,
-                      closeOnClick: true,
-                      pauseOnHover: true,
-                      draggable: true,
-                      progress: undefined,
-                      theme: 'dark',
-                    });
-                    navigate('/');
-                  }
-                });
+              loginHandler();
             }}
           >
             <div className="mb-6">

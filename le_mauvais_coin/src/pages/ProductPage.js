@@ -30,7 +30,9 @@ const ProductPage = () => {
             <div className="flex items-center mb-8">
               <div className="h-[70px] w-[70px] rounded-full bg-slate-700 mr-4"></div>
               <h4 className="font-text text-slate-800 font-bold text-xl">
-                Vendeur
+                {product.vendeur && product.vendeur.prenom
+                  ? product.vendeur.prenom
+                  : null}
               </h4>
             </div>
             <div className="h-[1px] w-full bg-slate-300 mb-8" />
