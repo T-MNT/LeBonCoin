@@ -96,6 +96,9 @@ class Product
     #[Groups('product')]
     private ?User $vendeur = null;
 
+    #[ORM\Column(length: 10)]
+    private ?string $date = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -325,6 +328,18 @@ class Product
     public function setVendeur(?User $vendeur): static
     {
         $this->vendeur = $vendeur;
+
+        return $this;
+    }
+
+    public function getDate(): ?string
+    {
+        return $this->date;
+    }
+
+    public function setDate(string $date): static
+    {
+        $this->date = $date;
 
         return $this;
     }

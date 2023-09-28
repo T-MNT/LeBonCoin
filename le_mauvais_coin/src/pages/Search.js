@@ -10,11 +10,50 @@ const Search = () => {
   const [price, setPrice] = useState({ minimum: 0, maximum: 0 });
   const [priceSet, setPriceSet] = useState(false);
   const [productList, setProductList] = useState([]);
-  const [categorie, setCategorie] = useState(1);
+  const [categorie, setCategorie] = useState(0);
 
   const navigate = useNavigate();
+  const urlCategory = useParams().item;
 
   useEffect(() => {
+    if (categorie === 0) {
+      switch (urlCategory) {
+        case 'immobilier':
+          setCategorie(1);
+          break;
+        case 'vehicules':
+          setCategorie(2);
+          break;
+        case 'vacances':
+          setCategorie(3);
+          break;
+        case 'emploi':
+          setCategorie(4);
+          break;
+        case 'mode':
+          setCategorie(5);
+          break;
+        case 'maison':
+          setCategorie(6);
+          break;
+        case 'multimedia':
+          setCategorie(7);
+          break;
+        case 'loisirs':
+          setCategorie(8);
+          break;
+        case 'materiel_professionnel':
+          setCategorie(9);
+          break;
+        case 'autres':
+          setCategorie(10);
+          break;
+
+        default:
+          break;
+      }
+    }
+
     axios
       .get(`https://127.0.0.1:8000/get/product/by/category/${categorie}`)
       .then((res) => setProductList(res.data));

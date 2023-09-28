@@ -91,7 +91,11 @@ const Navbar = (props) => {
             {menu.map((element) => (
               <NavLink
                 to={`/search/${element.name.toLocaleLowerCase()}`}
-                onClick={() => props.setCategorie(element.id)}
+                onClick={() => {
+                  if (props.setCategorie) {
+                    props.setCategorie(element.id);
+                  }
+                }}
               >
                 <li className="text-slate-900 text-[14px]">
                   {element.name.replace('_', ' ')}

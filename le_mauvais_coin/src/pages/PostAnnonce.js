@@ -34,13 +34,24 @@ const PostAnnonce = () => {
     categorie: null,
     modele: null,
     vendeur: null,
+    date: null,
   });
 
   useEffect(() => {
     if (user.email !== '') {
       annonceSetter('vendeur', '/api/users/' + userAccount.id);
+      annonceSetter('date', getCurrentDate());
     }
   }, [userAccount]);
+
+  const getCurrentDate = () => {
+    const currentDate = new Date();
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const year = currentDate.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
 
   const annonceSetter = (property, value) => {
     setAnnonce((prevAnnonce) => ({
@@ -49,7 +60,40 @@ const PostAnnonce = () => {
     }));
   };
 
-  const category1 = ['7', '5', '9', '10'];
+  const category1 = [
+    '/api/categories/7',
+    '/api/categories/5',
+    '/api/categories/9',
+    '/api/categories/10',
+  ];
+
+  const categoryDisplayer = () => {
+    switch (annonce.categorie) {
+      case '/api/categories/1':
+        return 'Immobilier';
+      case '/api/categories/2':
+        return 'Véhicules';
+      case '/api/categories/3':
+        return 'Vacances';
+      case '/api/categories/4':
+        return 'Emploi';
+      case '/api/categories/5':
+        return 'Mode';
+      case '/api/categories/6':
+        return 'Maison';
+      case '/api/categories/7':
+        return 'Multimédia';
+      case '/api/categories/8':
+        return 'Loisirs';
+      case '/api/categories/9':
+        return 'Matériel professionnel';
+      case '/api/categories/10':
+        return 'Autres';
+
+      default:
+        break;
+    }
+  };
 
   const contentDisplayer = () => {
     switch (step) {
@@ -141,6 +185,7 @@ const PostAnnonce = () => {
                     annonceSetter('etat', e.target.value);
                   }}
                 >
+                  <option>Choisir un état</option>
                   <option value="Neuf">Neuf</option>
                   <option value="Très bon état">Très bon état</option>
                   <option value="Bon état">Bon état</option>
@@ -163,7 +208,7 @@ const PostAnnonce = () => {
                   >
                     <option>Choisir un type de bien</option>
                     <option value="Maison">Maison</option>
-                    <option value="Maison">Appartemment</option>
+                    <option value="Appartement">Appartemment</option>
                   </select>
                 </div>
                 <div className="mb-6">
@@ -197,7 +242,7 @@ const PostAnnonce = () => {
                     className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
                     value={annonce.surface}
                     onChange={(e) => {
-                      annonceSetter('surface', e.target.value);
+                      annonceSetter('surface', Number(e.target.value));
                     }}
                   ></input>
                 </div>
@@ -208,7 +253,7 @@ const PostAnnonce = () => {
                     className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
                     value={annonce.pieces}
                     onChange={(e) => {
-                      annonceSetter('pieces', e.target.value);
+                      annonceSetter('pieces', Number(e.target.value));
                     }}
                   ></input>
                 </div>
@@ -475,7 +520,9 @@ const PostAnnonce = () => {
                 value={annonce.description}
               />
               <p className="text-sm text-slate-400 text-end mb-2">
-                {annonce.description.length + ' / 4000 caractères'}
+                {annonce.description && annonce.description.length
+                  ? +annonce.description.length + ' / 4000 caractères'
+                  : null}
               </p>
               <p className="text-xs text-blue-400 mb-6">
                 Nous vous rappelons que la vente de contrefaçons est interdite.
@@ -497,7 +544,7 @@ const PostAnnonce = () => {
                   className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
                   value={annonce.prix}
                   onChange={(e) => {
-                    annonceSetter('prix', e.target.value);
+                    annonceSetter('prix', Number(e.target.value));
                   }}
                 ></input>
               </div>
@@ -530,7 +577,7 @@ const PostAnnonce = () => {
             <div className="grid grid-cols-2 gap-y-4 mb-6">
               <div>
                 <h5 className="font-text text-slate-600">Catégorie</h5>
-                <p>{annonce.categorie}</p>
+                <p>{categoryDisplayer()}</p>
               </div>
               {/* IMMOBILIER */}
               {annonce.categorie === '/api/categories/1' ? (
@@ -663,7 +710,11 @@ const PostAnnonce = () => {
               <button
                 className="py-2 px-4 bg-[#4183D7] rounded text-white font-text"
                 onClick={() => {
-                  axios.post(routes.BACK + '/products', annonce);
+                  axios.post(routes.BACK + '/products', annonce).then((res) => {
+                    if (res.status === 200 || res.status === 201) {
+                      navigate('/');
+                    }
+                  });
                 }}
               >
                 Poster mon annonce
