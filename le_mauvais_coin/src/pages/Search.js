@@ -154,6 +154,7 @@ const Search = () => {
               <li
                 className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
                 key={index}
+                onClick={() => navigate('/product/' + product.id)}
               >
                 <div className="h-[260px] w-[200px] rounded bg-slate-700"></div>
                 <div className="pl-4 relative w-9/12">
@@ -189,6 +190,7 @@ const Search = () => {
               <li
                 className="relative w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
                 key={index}
+                onClick={() => navigate('/product/' + product.id)}
               >
                 <div className="h-[300px] w-[240px] rounded bg-slate-700 mb-2"></div>
                 <div>
@@ -211,6 +213,7 @@ const Search = () => {
               <li
                 className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
                 key={index}
+                onClick={() => navigate('/product/' + product.id)}
               >
                 <div className="h-[200px] w-[320px] rounded bg-slate-700"></div>
                 <div className="pl-4 relative w-9/12">
@@ -413,7 +416,10 @@ const Search = () => {
           </div>
         </div>
         <h4 className="my-6 text-2xl">
-          {type.item.charAt(0).toUpperCase() + type.item.slice(1)}
+          {(type.item.charAt(0).toUpperCase() + type.item.slice(1)).replace(
+            '_',
+            ' '
+          )}
         </h4>
         <p className="mb-12">
           {productList.length}{' '}

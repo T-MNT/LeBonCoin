@@ -3,7 +3,7 @@ import Home from './pages/Home';
 import Search from './pages/Search';
 import Auth from './pages/Auth';
 import PostAnnonce from './pages/PostAnnonce';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserSlice } from './redux/slices/userSlice';
 import jwtDecode from 'jwt-decode';
@@ -13,10 +13,10 @@ import axios from 'axios';
 
 function App() {
   const dispatch = useDispatch();
+  const [favoris, setFavoris] = useState(null);
 
   useEffect(() => {
     const token = window.localStorage.getItem('leboncoin login token : ');
-    console.log(jwtDecode(token));
     if (token) {
       dispatch(setUserSlice(jwtDecode(token)));
       axios
@@ -27,6 +27,9 @@ function App() {
           dispatch(setUserAccount(res.data[0]));
         });
     }
+    if (window.localStorage.getItem('LBC_FAVS')) {
+      setFavoris(JSON.parse(window.localStorage.getItem('LBC_FAVS')));
+    }
   }, []);
 
   return (
@@ -36,7 +39,10 @@ function App() {
         <Route path="/post" element={<PostAnnonce />} />
         <Route path="/search/:item" element={<Search />} />
         <Route path="/authentification/:param" element={<Auth />} />
-        <Route path="/product/:id" element={<ProductPage />} />
+        <Route
+          path="/product/:id"
+          element={<ProductPage favoris={favoris} setFavoris={setFavoris} />}
+        />
       </Routes>
     </div>
   );

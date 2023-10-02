@@ -418,7 +418,7 @@ const PostAnnonce = () => {
                     className="w-[380px] mr-2 border-[1px] border-slate-300 rounded py-[10px] pl-3 [&::-webkit-inner-spin-button]:appearance-none"
                     value={annonce.taille}
                     onChange={(e) => {
-                      annonceSetter('taille', e.target.value);
+                      annonceSetter('annee', e.target.value);
                     }}
                   ></input>
                 </div>
