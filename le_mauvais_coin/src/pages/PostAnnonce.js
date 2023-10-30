@@ -5,15 +5,25 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import '../styles/postAnnonce.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCameraRetro,
+  faLightbulb,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 const PostAnnonce = () => {
   const user = useSelector((state) => state.user);
   const userAccount = useSelector((state) => state.userAccount);
   const navigate = useNavigate();
 
+  // Get a reference to the storage service, which is used to create references in your storage bucket
+  const storage = getStorage();
+
   const [step, setStep] = useState(0);
+  const [photos, setPhotos] = useState([]);
   const [annonce, setAnnonce] = useState({
     nom: null,
     prix: null,
@@ -35,8 +45,95 @@ const PostAnnonce = () => {
     modele: null,
     vendeur: null,
     date: null,
+    imagesUrl: [],
   });
 
+  useEffect(() => {
+    if (photos.length >= 1) {
+      for (let i = 0; i < 11; i++) {
+        let div = document.getElementById('photo' + (i + 1));
+        if (div != null) {
+          if (photos[i]) {
+            div.innerHTML = `<img class="object-cover h-full w-full rounded" src=${photos[i]} />`;
+          } else {
+            div.innerHTML = `
+          <div class="text-center">
+          <FontAwesomeIcon
+            icon=${faCameraRetro}
+            style={{ color: '#CBD5E1' }}
+            size="2xl"
+          />
+          <p class="block text-slate-400 font-bold mt-2">
+            ${'Photo n°' + (i + 1)}
+          </p>
+        </div>`;
+          }
+        }
+      }
+    } else {
+      for (let i = 0; i < 11; i++) {
+        let div = document.getElementById('photo' + (i + 1));
+        if (div != null) {
+          div.innerHTML = `
+          <div class="text-center">
+          <FontAwesomeIcon
+            icon=${faCameraRetro}
+            style={{ color: '#CBD5E1' }}
+            size="2xl"
+          />
+          <p class="block text-slate-200 font-bold mt-2">
+            ${'Photo n°' + (i + 1)}
+          </p>
+        </div>`;
+        }
+      }
+    }
+  }, [photos]);
+
+  let photoDivs = [];
+
+  for (let i = 0; i < 11; i++) {
+    photoDivs.push(
+      <div
+        id={i}
+        className="w-[150px] h-[150px] flex items-center justify-center rounded border-[1px] border-dashed border-slate-300 cursor-pointer relative"
+      >
+        {photos.length > i ? (
+          <div class="absolute top-[-10px] right-[-10px] rounded-full h-[20px] w-[20px] border-2 border-slate-400 flex justify-center items-center">
+            <FontAwesomeIcon
+              icon={faXmark}
+              style={{ color: '#878787' }}
+              onClick={() => {
+                let photosCopy = photos;
+                let result = photosCopy.filter(
+                  (photo) => photosCopy.indexOf(photo) !== i
+                );
+
+                setPhotos(result);
+              }}
+            />
+          </div>
+        ) : null}
+        <div
+          className="h-full w-full flex justify-center items-center"
+          id={'photo' + (i + 1)}
+        >
+          <div className="text-center">
+            <FontAwesomeIcon
+              icon={faCameraRetro}
+              style={{ color: '#CBD5E1' }}
+              size="2xl"
+            />
+            <p className="block text-slate-300 font-bold mt-2">
+              {'Photo n°' + (i + 1)}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  //////AJOUTE LA DATE DU JOUR ET ID DE L'UTILISATEUR A L'ANNONCE//////
   useEffect(() => {
     if (user.email !== '') {
       annonceSetter('vendeur', '/api/users/' + userAccount.id);
@@ -44,6 +141,7 @@ const PostAnnonce = () => {
     }
   }, [userAccount]);
 
+  //////RETOURNE LA DATE DU JOUR AU FORMAT DD/MM/YYYY //////
   const getCurrentDate = () => {
     const currentDate = new Date();
     const day = String(currentDate.getDate()).padStart(2, '0');
@@ -53,6 +151,49 @@ const PostAnnonce = () => {
     return `${day}/${month}/${year}`;
   };
 
+  useEffect(() => {
+    if (photos.length > 0 && photos.length === annonce.imagesUrl.length) {
+      axios.post(routes.BACK + '/products', annonce).then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          navigate('/');
+        }
+      });
+    }
+  }, [annonce.imagesUrl]);
+
+  const postAnnonceHandler = async () => {
+    let promises = [];
+    let urlArray = [];
+
+    for (let i = 0; i < photos.length; i++) {
+      let id = uuidv4();
+      const storageRef = ref(storage, 'pictures/' + id);
+
+      let promise = axios
+        .get(photos[i], { responseType: 'blob' })
+        .then((response) => {
+          return uploadBytes(storageRef, response.data).then((snapshot) => {
+            urlArray.push(snapshot.metadata.fullPath);
+          });
+        });
+
+      promises.push(promise);
+    }
+
+    await Promise.all(promises);
+    setAnnonce({ ...annonce, imagesUrl: urlArray });
+  };
+
+  //////Convertis les images en blob et les ajoute au state photos//////
+  const uploadFilesHandler = async (e) => {
+    let newArray = [...photos];
+    for (let i = 0; i < e.target.files.length; i++) {
+      newArray.push(URL.createObjectURL(e.target.files[i]));
+    }
+    setPhotos(newArray);
+  };
+
+  //////MODIFIE LES PROPRIETES DU STATE ANNONCE//////
   const annonceSetter = (property, value) => {
     setAnnonce((prevAnnonce) => ({
       ...prevAnnonce,
@@ -95,6 +236,7 @@ const PostAnnonce = () => {
     }
   };
 
+  //////FONCTION QUI GENERE LES INPUTS POUR CHAQUE ETAPE ET CHAQUE CATEGORIE DE PRODUIT//////
   const contentDisplayer = () => {
     switch (step) {
       case 0:
@@ -568,6 +710,62 @@ const PostAnnonce = () => {
       case 4:
         return (
           <>
+            <div className="w-full bg-[#FFF0E8] py-6 px-4 rounded">
+              <p className="font-text ">
+                3 photos c'est bien... 10 photos c'est mieux ! <br />
+                Surtout quand c'est gratuit.
+              </p>
+              <p className="text-sm">
+                Profitez-en pour prendre votre bien en photo sous toutes les
+                coutures !
+              </p>
+            </div>
+            <p className="my-6">
+              Faites glisser vos photos pour changer leur ordre
+            </p>
+            <div className="grid grid-cols-4 w-[90%] gap-4">
+              <label className="w-[150px] h-[150px] flex items-center justify-center rounded border-[1px] border-orange-500 cursor-pointer">
+                <div className="text-center">
+                  <FontAwesomeIcon
+                    icon={faCameraRetro}
+                    style={{ color: '#fe6f14' }}
+                    size="2xl"
+                  />
+                  <p className="block text-sm text-orange-500 font-bold mt-2">
+                    Ajouter des photos
+                  </p>
+                </div>
+
+                <input
+                  type="file"
+                  accept="image/png, image/jpg, image/jpeg"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => uploadFilesHandler(e)}
+                />
+              </label>
+              {photoDivs}
+            </div>
+
+            <div className="flex justify-between w-full mt-10">
+              <button
+                className="py-2 px-4 border-[1px] border-[#4183D7] text-[#4183D7] rounded  font-text"
+                onClick={() => setStep(step - 1)}
+              >
+                Retour
+              </button>
+              <button
+                className="py-2 px-4 bg-[#4183D7] rounded text-white font-text"
+                onClick={() => setStep(step + 1)}
+              >
+                Continuer
+              </button>
+            </div>
+          </>
+        );
+      case 5:
+        return (
+          <>
             <h4 className="font-text text-xl mb-3">Résumé de votre annonce</h4>
             <div className="mb-8">
               <h5 className="font-text text-slate-600">Titre</h5>
@@ -692,15 +890,37 @@ const PostAnnonce = () => {
                   </div>
                 </>
               ) : null}
-              <div>
-                <h5 className="font-text text-slate-600">Prix</h5>
-                <p>{annonce.prix + ' €'}</p>
+            </div>
+
+            <div className="my-8">
+              <h5 className="font-text text-lg text-slate-800 mb-4">Photos</h5>
+
+              <div className="w-[90%] grid grid-cols-4 gap-y-[15px]">
+                {photos.map((photo, index) => (
+                  <div className="w-[150px] h-[150px] flex items-center justify-center shadow-2xl rounded border-[1px]  border-slate-300 cursor-pointer relative">
+                    <div
+                      className="h-full w-full flex justify-center items-center"
+                      id={'photo' + (index + 1)}
+                    >
+                      <img
+                        class="object-cover h-full w-full rounded"
+                        src={photo}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             <h5 className="font-text text-slate-600">Description</h5>
             <p>{annonce.description}</p>
-            <div className="flex justify-between w-full mt-10">
+            <div className="mt-8">
+              <h5 className="font-text text-xl text-slate-600">Prix</h5>
+              <p className="font-bold font-text text-xl mt-2">
+                {annonce.prix + ' €'}
+              </p>
+            </div>
+            <div className="flex justify-between w-full mt-8">
               <button
                 className="py-2 px-4 border-[1px] border-[#4183D7] text-[#4183D7] rounded  font-text"
                 onClick={() => setStep(step - 1)}
@@ -709,13 +929,7 @@ const PostAnnonce = () => {
               </button>
               <button
                 className="py-2 px-4 bg-[#4183D7] rounded text-white font-text"
-                onClick={() => {
-                  axios.post(routes.BACK + '/products', annonce).then((res) => {
-                    if (res.status === 200 || res.status === 201) {
-                      navigate('/');
-                    }
-                  });
-                }}
+                onClick={() => postAnnonceHandler()}
               >
                 Poster mon annonce
               </button>
@@ -728,7 +942,7 @@ const PostAnnonce = () => {
   };
 
   return (
-    <div className="bg-[#F4F9FE] h-[100vh]">
+    <div className="bg-[#F4F9FE] min-h-[100vh] pb-12">
       <PostAnnonceBar />
       <div className="w-[55%] mx-auto mt-6">
         <div className="flex">

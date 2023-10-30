@@ -3,14 +3,25 @@ import { useParams } from 'react-router-dom';
 import Navbar from '../layout/Navbar';
 import axios from 'axios';
 import routes from '../variables/Vroutes';
+import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 
 const ProductPage = (props) => {
   const [product, setProduct] = useState({});
+  const [urls, setUrls] = useState([]);
   const id = useParams().id;
+
+  // Get a reference to the storage service, which is used to create references in your storage bucket
+  const storage = getStorage();
 
   useEffect(() => {
     axios.get(routes.BACK + '/products/' + id).then((res) => {
       setProduct(res.data);
+      let imagesUrls = res.data.imagesUrl;
+      console.log(imagesUrls);
+
+      Promise.all(
+        imagesUrls.map((url) => getDownloadURL(ref(storage, url)))
+      ).then((downloadUrls) => setUrls(downloadUrls));
     });
   }, []);
 
@@ -82,24 +93,24 @@ const ProductPage = (props) => {
             <ul className="grid grid-cols-2 gap-y-6">
               <li>
                 <p className="text-sm text-slate-600">Localisation</p>
-                <p className="font-bold text-lg">{product.localisation}</p>
+                <p className="font-bold">{product.localisation}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Type de bien</p>
-                <p className="font-bold text-lg">{product.materielType}</p>
+                <p className="font-bold">{product.materielType}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Pièces</p>
-                <p className="font-bold text-lg">{product.pieces}</p>
+                <p className="font-bold">{product.pieces}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Surface</p>
-                <p className="font-bold text-lg">{product.surface + ' m²'}</p>
+                <p className="font-bold">{product.surface + ' m²'}</p>
               </li>
               {product.annee && product.annee.length > 1 ? (
                 <li>
                   <p className="text-sm text-slate-600">Année</p>
-                  <p className="font-bold text-lg">{product.annee}</p>
+                  <p className="font-bold">{product.annee}</p>
                 </li>
               ) : null}
             </ul>
@@ -112,30 +123,28 @@ const ProductPage = (props) => {
             <ul className="grid grid-cols-2 gap-y-6">
               <li>
                 <p className="text-sm text-slate-600">Marque</p>
-                <p className="font-bold text-lg">{product.marque}</p>
+                <p className="font-bold">{product.marque}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Modèle</p>
-                <p className="font-bold text-lg">{product.modele}</p>
+                <p className="font-bold">{product.modele}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Boîte</p>
-                <p className="font-bold text-lg">{product.boite}</p>
+                <p className="font-bold">{product.boite}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Carburant</p>
-                <p className="font-bold text-lg">{product.carburant}</p>
+                <p className="font-bold">{product.carburant}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Kilomètrage</p>
-                <p className="font-bold text-lg">
-                  {product.kilometrage + ' km'}
-                </p>
+                <p className="font-bold">{product.kilometrage + ' km'}</p>
               </li>
               {product.annee && product.annee.length > 1 ? (
                 <li>
                   <p className="text-sm text-slate-600">Année</p>
-                  <p className="font-bold text-lg">{product.annee}</p>
+                  <p className="font-bold">{product.annee}</p>
                 </li>
               ) : null}
             </ul>
@@ -148,19 +157,19 @@ const ProductPage = (props) => {
             <ul className="grid grid-cols-2 gap-y-6">
               <li>
                 <p className="text-sm text-slate-600">Taille</p>
-                <p className="font-bold text-lg">{product.taille}</p>
+                <p className="font-bold">{product.taille}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Marque</p>
-                <p className="font-bold text-lg">{product.marque}</p>
+                <p className="font-bold">{product.marque}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Matière</p>
-                <p className="font-bold text-lg">{product.matiere}</p>
+                <p className="font-bold">{product.matiere}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Etat</p>
-                <p className="font-bold text-lg">{product.etat}</p>
+                <p className="font-bold">{product.etat}</p>
               </li>
             </ul>
           </div>
@@ -172,20 +181,20 @@ const ProductPage = (props) => {
             <ul className="grid grid-cols-2 gap-y-6">
               <li>
                 <p className="text-sm text-slate-600">Modèle</p>
-                <p className="font-bold text-lg">{product.modele}</p>
+                <p className="font-bold">{product.modele}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Marque</p>
-                <p className="font-bold text-lg">{product.marque}</p>
+                <p className="font-bold">{product.marque}</p>
               </li>
               <li>
                 <p className="text-sm text-slate-600">Etat</p>
-                <p className="font-bold text-lg">{product.etat}</p>
+                <p className="font-bold">{product.etat}</p>
               </li>
               {product.annee && product.annee.length > 1 ? (
                 <li>
                   <p className="text-sm text-slate-600">Année</p>
-                  <p className="font-bold text-lg">{product.annee}</p>
+                  <p className="font-bold">{product.annee}</p>
                 </li>
               ) : null}
             </ul>
@@ -200,17 +209,43 @@ const ProductPage = (props) => {
     <div className="font-text">
       <Navbar />
       <div className=" w-[55%] mx-auto h-[80vh]">
-        <div className=" w-fit flex my-10" id="pic-container">
+        <div className=" w-fit flex gap-x-4 mt-10 mb-6">
           <div
-            className=" w-[350px] h-[340px] bg-slate-500 mr-3 rounded-xl"
-            id="pic1"
-          ></div>
-          <div className=" w-[350px] flex flex-col justify-between mr-4">
-            <div className="h-[48%] bg-red-200 rounded-xl"></div>
-            <div className="h-[48%] bg-red-500 rounded-xl"></div>
+            className={
+              urls.length === 1 ? 'max-h-[340px]' : 'grid grid-cols-2 gap-x-2  '
+            }
+            id="pic-container"
+          >
+            <img
+              className={
+                urls.length === 1
+                  ? 'object-cover object-center w-full h-full rounded-xl'
+                  : 'object-cover w- h-full  rounded-xl'
+              }
+              src={urls[0]}
+            />
+            <div className="grid grid-row-2 gap-y-2">
+              <img
+                className={
+                  urls.length === 2
+                    ? 'h-[340px] object-cover rounded-xl'
+                    : 'object-cover w-full h-[165px] rounded-xl'
+                }
+                src={urls[1]}
+              />
+              <div className="relative">
+                <img
+                  className="object-cover w-full h-[165px] mr-3 rounded-xl"
+                  src={urls[2]}
+                />
+                <p className="absolute right-4 bottom-2 bg-white px-2 py-1 rounded-full cursor-pointer opacity-80">
+                  Autres photos
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="h-fit px-4 py-6 rounded shadow-2xl">
+          <div className=" px-4 py-6 rounded shadow-2xl">
             <div className="flex items-center mb-8">
               <div className="h-[70px] w-[70px] rounded-full bg-slate-700 mr-4"></div>
               <h4 className="font-text text-slate-800 font-bold text-xl">

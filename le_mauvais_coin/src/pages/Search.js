@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../layout/Navbar';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 
 const Search = () => {
   const type = useParams();
@@ -10,8 +11,9 @@ const Search = () => {
   const [price, setPrice] = useState({ minimum: 0, maximum: 0 });
   const [priceSet, setPriceSet] = useState(false);
   const [productList, setProductList] = useState([]);
+  const [imageList, setImageList] = useState([]);
   const [categorie, setCategorie] = useState(0);
-
+  const storage = getStorage();
   const navigate = useNavigate();
   const urlCategory = useParams().item;
 
@@ -58,6 +60,21 @@ const Search = () => {
       .get(`https://127.0.0.1:8000/get/product/by/category/${categorie}`)
       .then((res) => setProductList(res.data));
   }, [categorie]);
+
+  useEffect(() => {
+    if (productList.length > 0) {
+      Promise.all(
+        productList.map((product) =>
+          getDownloadURL(ref(storage, product.imagesUrl[0]))
+        )
+      ).then((downloadUrls) => setImageList(downloadUrls));
+    }
+  }, [productList]);
+
+  const fetchImageUrl = async (imageUrl) => {
+    const url = await getDownloadURL(ref(storage, imageUrl));
+    return url;
+  };
 
   const productsDisplayer = () => {
     switch (categorie) {
@@ -109,54 +126,14 @@ const Search = () => {
           <ul>
             {productList.map((product, index) => (
               <li
-                className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
+                className="flex w-9/12 mb-4 pb-4 border-b-[1px]  border-slate-300 "
                 key={index}
                 onClick={() => navigate('/product/' + product.id)}
               >
-                <div className="h-[200px] w-[320px] rounded bg-slate-700"></div>
-                <div className="pl-4 relative w-7/12">
-                  <p className="mb-2 text-xl">{product.nom}</p>
-                  <span className="flex mb-6">
-                    <p className="mr-6">{product.prix}€</p>
-                    <p>{product.etat}</p>
-                  </span>
-                  <div className="flex mb-6">
-                    <span className="text-center pr-4">
-                      <p className="text-slate-500">Année</p>
-                      <p>{product.annee}</p>
-                    </span>
-                    <span className="text-center  px-4 border-l-[1px] border-slate-300">
-                      <p className="text-slate-500">Kilométrage</p>
-                      <p>{product.kilometrage}</p>
-                    </span>
-                    <span className="text-center px-4 border-x-[1px] border-slate-300">
-                      <p className="text-slate-500">Carburant</p>
-                      <p>{product.carburant}</p>
-                    </span>
-                    <span className="text-center px-4">
-                      <p className="text-slate-500">Boîte de vitesse</p>
-                      <p>{product.boite}</p>
-                    </span>
-                  </div>
-                  <p className="absolute left-4 bottom-0 text-sm text-slate-400">
-                    Posté par Jacqueline à Bretignies-Sur-Orge le 15/07/24 à
-                    12:24
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        );
-      case 7:
-        return (
-          <ul>
-            {productList.map((product, index) => (
-              <li
-                className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
-                key={index}
-                onClick={() => navigate('/product/' + product.id)}
-              >
-                <div className="h-[260px] w-[200px] rounded bg-slate-700"></div>
+                <img
+                  className="max-h-[200px] w-[400px] rounded object-cover cursor-pointer"
+                  src={imageList[index]}
+                />
                 <div className="pl-4 relative w-9/12">
                   <p className="mb-2 text-xl">{product.nom}</p>
                   <span className="flex mb-6">
@@ -168,11 +145,14 @@ const Search = () => {
                       <p>{product.annee}</p>
                     </span>
                     <span className="text-center  px-4 border-l-[1px] border-slate-300">
-                      <p className="text-slate-500">Etat</p>
-                      <p>{product.etat}</p>
+                      <p className="text-slate-500">Kilométrage</p>
+                      <p>{product.kilometrage} km</p>
+                    </span>
+                    <span className="text-center  px-4 border-l-[1px] border-slate-300">
+                      <p className="text-slate-500">Boîte</p>
+                      <p>{product.boite}</p>
                     </span>
                   </div>
-                  <p className="w-9/12">{product.description}</p>
                   <p className="absolute w-9/12 left-4 bottom-0 text-sm text-slate-400">
                     Posté par Jacqueline à Bretignies-Sur-Orge le 15/07/24 à
                     12:24
@@ -180,6 +160,43 @@ const Search = () => {
                 </div>
               </li>
             ))}
+          </ul>
+        );
+      case 7:
+        return (
+          <ul>
+            {productList.map((product, index) => {
+              fetchImageUrl(product.imagesUrl[0]).then((url) => (
+                <li
+                  className="flex w-9/12 mb-4 pb-4 border-b-[1px] border-slate-300 "
+                  key={index}
+                  onClick={() => navigate('/product/' + product.id)}
+                >
+                  <img className="h-[260px] w-[200px] rounded" src={url} />
+                  <div className="pl-4 relative w-9/12">
+                    <p className="mb-2 text-xl">{product.nom}</p>
+                    <span className="flex mb-6">
+                      <p className="mr-6">{product.prix}€</p>
+                    </span>
+                    <div className="flex mb-10">
+                      <span className="text-center pr-4">
+                        <p className="text-slate-500">Année</p>
+                        <p>{product.annee}</p>
+                      </span>
+                      <span className="text-center  px-4 border-l-[1px] border-slate-300">
+                        <p className="text-slate-500">Etat</p>
+                        <p>{product.etat}</p>
+                      </span>
+                    </div>
+                    <p className="w-9/12">{product.description}</p>
+                    <p className="absolute w-9/12 left-4 bottom-0 text-sm text-slate-400">
+                      Posté par Jacqueline à Bretignies-Sur-Orge le 15/07/24 à
+                      12:24
+                    </p>
+                  </div>
+                </li>
+              ));
+            })}
           </ul>
         );
       case 5:

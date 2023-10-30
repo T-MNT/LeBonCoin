@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ProductRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -97,7 +98,12 @@ class Product
     private ?User $vendeur = null;
 
     #[ORM\Column(length: 10)]
+    #[Groups('product')]
     private ?string $date = null;
+
+    #[ORM\Column]
+    private array $imagesUrl = [];
+
 
     public function getId(): ?int
     {
@@ -343,4 +349,17 @@ class Product
 
         return $this;
     }
+
+    public function getImagesUrl(): array
+    {
+        return $this->imagesUrl;
+    }
+
+    public function setImagesUrl(array $imagesUrl): static
+    {
+        $this->imagesUrl = $imagesUrl;
+
+        return $this;
+    }
+
 }
